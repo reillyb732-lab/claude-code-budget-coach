@@ -16,7 +16,7 @@ from pathlib import Path
 STATE_DIR = Path(os.environ.get("BUDGET_COACH_DIR", Path.home() / ".claude" / "budget-coach"))
 SAMPLES = STATE_DIR / "samples.json"
 RATE_WINDOW = 30 * 60  # measure burn rate over the last 30 minutes
-MIN_SPAN = 3 * 60      # need at least 3 minutes of readings before forecasting
+MIN_SPAN = 10 * 60     # need 10 minutes of readings so one big reply can't trigger a warning
 
 GREEN, YELLOW, RED, DIM, RESET = "\033[32m", "\033[33m", "\033[31m", "\033[2m", "\033[0m"
 
@@ -58,12 +58,16 @@ def record(now, pct, resets_at):
 
 
 def forecast(now, pct, resets_at, samples):
-    """Return (hit_time or None, enough_data)."""
-    first = samples[0]
-    span = now - first[0]
-    if span < MIN_SPAN:
+    """Return (hit_time or None, enough_data).
+
+    Uses the slower of two burn rates: over the whole 30-minute window and over the
+    last 10 minutes. A one-off spike only raises one of them, so only sustained
+    heavy use triggers a warning.
+    """
+    if now - samples[0][0] < MIN_SPAN:
         return None, False
-    rate = (pct - first[1]) / span  # percent per second
+    recent = [s for s in samples if now - s[0] >= MIN_SPAN][-1]  # newest reading 10+ min old
+    rate = min((pct - s[1]) / (now - s[0]) for s in (samples[0], recent))  # percent per second
     if rate <= 0:
         return None, True
     hit = now + (100 - pct) / rate
