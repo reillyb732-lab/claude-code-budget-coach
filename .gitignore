@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+samples.json
+.env
+secrets.json
