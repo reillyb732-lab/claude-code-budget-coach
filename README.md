@@ -41,6 +41,10 @@ On macOS/Linux use `python3` instead of `python`. On Windows, use the full path 
 
 **Budget Coach Pro** adds a waste detector (catches full test-suite runs, giant file reads and bloated MCP setups as they happen), automatic model routing, a `/lean` mode and a weekly "where did my usage go" report. → *[link coming soon]*
 
+## Also by me
+
+**[Safe Mode](https://github.com/reillyb732-lab/claude-code-safe-mode)**: blocks Claude Code from your passwords and keys, and asks you in plain English before risky commands like mass deletes or force-pushes.
+
 ## License
 
 MIT
